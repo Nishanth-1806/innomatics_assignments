@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex Tester - Clone of regex101</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        textarea { width: 100%; height: 150px; margin-bottom: 10px; font-family: monospace; }
+        input[type="submit"] { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        #results { margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 5px; }
+        .match { background: #d4edda; margin: 5px 0; padding: 10px; border-left: 4px solid #28a745; }
+    </style>
+</head>
+<body>
+    <h1>Regex Tester</h1>
+    <p>Enter test string and regex, then submit to see all matches.</p>
+    
+    <form id="regexForm">
+        <label for="testString">Test String:</label><br>
+        <textarea id="testString" placeholder="Enter your test string here...">Please contact us at support@example.com, sales-team@company.org, or admin123@my-site.net for more info.</textarea><br>
+        
+        <label for="regex">Regular Expression:</label><br>
+        <textarea id="regex" placeholder="/example/ or /\\d+/g">[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}</textarea><br>
+        
+        <input type="submit" value="Submit">
+    </form>
+    
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('regexForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const testString = document.getElementById('testString').value;
+            const regexInput = document.getElementById('regex').value;
+            
+            // Parse regex from input, assuming /pattern/flags format
+            let regex;
+            try {
+                if (regexInput.startsWith('/') && regexInput.lastIndexOf('/') > 0) {
+                    const lastSlash = regexInput.lastIndexOf('/');
+                    const pattern = regexInput.slice(1, lastSlash);
+                    const flags = regexInput.slice(lastSlash + 1);
+                    regex = new RegExp(pattern, flags);
+                } else {
+                    regex = new RegExp(regexInput, 'g');
+                }
+            } catch (err) {
+                document.getElementById('results').innerHTML = '<p style="color: red;">Invalid regex: ' + err.message + '</p>';
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('results');
+            const matches = [];
+            let match;
+            
+            while ((match = regex.exec(testString)) !== null) {
+                matches.push({
+                    match: match[0],
+                    index: match.index,
+                    groups: match.slice(1)
+                });
+            }
+            
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = '<p>No matches found.</p>';
+            } else {
+                let html = `<p>Found ${matches.length} match(es):</p>`;
+                matches.forEach((m, i) => {
+                    html += `<div class="match">
+                        <strong>Match ${i+1}:</strong> "${m.match}" at position ${m.index}<br>
+                        ${m.groups.length > 0 ? '<strong>Groups:</strong> ' + m.groups.map(g => `"${g}"`).join(', ') : ''}
+                    </div>`;
+                });
+                resultsDiv.innerHTML = html;
+            }
+        });
+    </script>
+</body>
+</html>
